@@ -13,7 +13,7 @@ class ToggablePanel extends Component {
     };
 
     static defaultProps = {
-        isOpened: false
+        isOpened: true
     };
 
     static childContextTypes = {
