@@ -52,6 +52,8 @@ PackageFactory:
           workspaces:
             byName: ${Guevara.Workspace.initializeWorkspacesByName()}
             active: ${Guevara.Workspace.getPersonalWorkspaceName()}
+#          images: # todo: move into "storage"
+            #byUuid: []
         ui:
           contentCanvas:
             src: ${Guevara.NodeInfo.uri(documentNode, controllerContext)}

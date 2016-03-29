@@ -34,3 +34,11 @@ export const discard = nodeContextPaths => fetch('/che!/service/discard', {
         nodeContextPaths
     })
 }).then(response => response.json());
+
+export const loadImageMetadata = imageVariantUuid => fetch('neos/content/image-with-metadata?image=' + imageVariantUuid, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+        'Content-Type': 'application/json'
+    }
+}).then(response => response.json());
