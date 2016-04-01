@@ -7,6 +7,7 @@ const Button = props => {
     const {
         children,
         className,
+        isPressed,
         isFocused,
         isDisabled,
         isActive,
@@ -22,12 +23,14 @@ const Button = props => {
     const classNames = mergeClassNames({
         [styles.btn]: true,
         [styles['btn--clean']]: style === 'clean',
+        [styles['btn--cleanWithBorder']]: style === 'cleanWithBorder',
         [styles['btn--lighter']]: style === 'lighter',
         [styles['btn--transparent']]: style === 'transparent',
         [styles['btn--cleanHover']]: hoverStyle === 'clean',
         [styles['btn--brandHover']]: hoverStyle === 'brand',
         [styles['btn--darkenHover']]: hoverStyle === 'darken',
         [styles['btn--brandActive']]: isActive,
+        [styles['btn--isPressed']]: isPressed,
         [className]: className && className.length
     });
     const attributes = {
@@ -63,6 +66,7 @@ const Button = props => {
     );
 };
 Button.propTypes = {
+    isPressed: PropTypes.bool,
     // ARIA & UI related propTypes.
     isFocused: PropTypes.bool.isRequired,
     isDisabled: PropTypes.bool.isRequired,
@@ -84,8 +88,8 @@ Button.propTypes = {
     children: PropTypes.node.isRequired
 };
 Button.defaultProps = {
-    style: 'clean',
-    hoverStyle: 'clean',
+    style: '',
+    hoverStyle: 'brand',
     isFocused: false,
     isDisabled: false,
     isActive: false
