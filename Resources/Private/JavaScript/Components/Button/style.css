@@ -42,6 +42,12 @@
 .btn--brandActive {
     background: $brand;
 }
+.btn--small {
+    height: 32px;
+    font-size: 13px;
+    padding: 0 $halfSpacing;
+}
+
 .btn--brandHover.btn--isPressed,
 .btn--brandHover:hover {
     background: $brand;

@@ -26,6 +26,7 @@ const Button = props => {
         [styles['btn--cleanWithBorder']]: style === 'cleanWithBorder',
         [styles['btn--lighter']]: style === 'lighter',
         [styles['btn--transparent']]: style === 'transparent',
+        [styles['btn--small']]: style === 'small',
         [styles['btn--cleanHover']]: hoverStyle === 'clean',
         [styles['btn--brandHover']]: hoverStyle === 'brand',
         [styles['btn--darkenHover']]: hoverStyle === 'darken',
