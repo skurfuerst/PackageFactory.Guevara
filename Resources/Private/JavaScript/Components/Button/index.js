@@ -74,7 +74,7 @@ Button.propTypes = {
     isActive: PropTypes.bool.isRequired,
 
     // Style related propTypes.
-    style: PropTypes.oneOf(['clean', 'lighter', 'transparent']).isRequired,
+    style: PropTypes.oneOf(['clean', 'lighter', 'transparent', 'small']).isRequired,
     hoverStyle: PropTypes.oneOf(['clean', 'brand', 'darken']).isRequired,
     className: PropTypes.string,
 
