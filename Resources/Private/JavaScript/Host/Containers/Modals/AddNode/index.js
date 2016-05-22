@@ -9,9 +9,9 @@ import {
     Dialog,
     Button,
     Grid,
-    GridItem,
-    I18n
+    GridItem
 } from 'Components/index';
+import {I18n} from 'Host/Containers/index';
 import {
     referenceNodeSelector,
     nodeTypesForAddNodeModalSelector
