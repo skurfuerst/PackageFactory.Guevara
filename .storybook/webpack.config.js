@@ -6,6 +6,10 @@ module.exports = Object.assign({}, defaultConfig, {
             {
                 test: /\.css$/,
                 loader: 'style!css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss-loader'
+            },
+            {
+                test: /\.(woff|woff2)$/,
+                loader: 'url?limit=100000'
             }
         ]
     }
