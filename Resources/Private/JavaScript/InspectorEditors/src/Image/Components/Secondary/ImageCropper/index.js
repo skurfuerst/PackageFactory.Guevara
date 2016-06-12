@@ -1,6 +1,7 @@
 import React, {Component, PropTypes} from 'react';
 import {Components, SecondaryInspector, api} from '@host';
 import ReactCrop from 'react-image-crop';
+import {prop} from 'ramda';
 import {Maybe} from 'monet';
 
 import style from './style.css';
@@ -69,30 +70,32 @@ export default class ImageCropper extends Component {
         const aspectRatioLocked = false;
         const aspectRatioLockIcon = (aspectRatioLocked ? <Icon icon="lock" /> : null);
         const {sourceImage, onClose, onComplete} = this.props;
-        const src = sourceImage.previewUri.orSome('/_Resources/Static/Packages/TYPO3.Neos/Images/dummy-image.svg');
+        const src = sourceImage.preview.uri;
 
         return (
             <SecondaryInspector onClose={() => onClose()}>
                 <div style={{textAlign: 'center'}}>
                     <div className={style.tools}>
                         <div className={style.aspectRatioIndicator}>
-                            {cropConfiguration.aspectRatioReducedLabel.map(label => [
-                                <Icon icon="crop" />,
-                                <span title={label}>{label}</span>,
-                                <span>{aspectRatioLockIcon}</span>
-                            ]).orSome('')}
+                            <Icon icon="crop" />
+                            <span title={cropConfiguration.aspectRatioReducedLabel}>
+                                {cropConfiguration.aspectRatioReducedLabel}
+                            </span>
+                            <span>{aspectRatioLockIcon}</span>
                         </div>
 
                         <AspectRatioDropDown
                             placeholder="Aspect Ratio"
-                            current={cropConfiguration.aspectRatioStrategy}
+                            current={cropConfiguration.maybeAspectRatioStrategy}
                             options={cropConfiguration.aspectRatioOptions}
                             onSelect={::this.setAspectRatio}
                             onClear={::this.clearAspectRatio}
                             />
 
                         <div className={style.dimensions}>
-                            {cropConfiguration.aspectRatioDimensions.map(({width, height}) => [
+                            {cropConfiguration.maybeAspectRatioStrategy
+                                .map(prop('dimensions'))
+                                .map(({width, height}) => [
                                 <TextInput
                                     className={style.dimensionInput}
                                     type="number"
@@ -115,7 +118,7 @@ export default class ImageCropper extends Component {
 
                     <ReactCrop
                         src={src}
-                        crop={cropConfiguration.cropInformation}
+                        crop={cropConfiguration.maybeCropInformation.orSome({})}
                         onComplete={cropArea => onComplete(cropArea)}
                         />
                 </div>

@@ -60,7 +60,8 @@ export const getHookRegistry =  discover(function* () {
 
 export const getApi = discover(function* () {
     const store = yield getStore;
-    return createApi(store);
+    const csrfToken = yield getCsrfToken;
+    return createApi(store, csrfToken);
 });
 
 export const getHostApi = discover(function* () {

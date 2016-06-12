@@ -28,7 +28,7 @@ export default class AspectRatioDropDown extends Component {
         return (
             <div className={style.wrapper}>
                 <DropDown className={style.dropDown}>
-                    {Maybe.fromNull(current.label ? current : null).map(
+                    {current.map(
                         current => (
                             <div stlye={{position: 'relative'}}>
                                 <DropDown.Header className={style.dropDown__btn}>

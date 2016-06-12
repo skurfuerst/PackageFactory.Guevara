@@ -20,6 +20,8 @@ export default (api, inspectorEditorRegistry, hookRegistry) => {
         ...api
     };
 
+    console.log(api);
+
     Object.defineProperty(pluginApi, '@Neos:RuntimeDependencies', createReadOnlyValue(
         createRuntimeDependencies(api)
     ));

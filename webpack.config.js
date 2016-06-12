@@ -55,6 +55,10 @@ const config = {
         root: [
             path.resolve(__dirname, 'Resources/Private/JavaScript')
         ],
+        alias: {
+            '@neos/libs-utils': path.resolve(__dirname, 'Resources/Private/JavaScript/Libraries/Utils/src/'),
+            '@neos/libs-media': path.resolve(__dirname, 'Resources/Private/JavaScript/Libraries/Media/src/')
+        },
         modulesDirectories: [
             'node_modules',
             path.resolve(__dirname, './node_modules')

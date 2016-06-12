@@ -4,7 +4,6 @@ import {$set, $drop, $get} from 'plow-js';
 import {Maybe} from 'monet';
 
 import {PreviewScreen, Controls, Secondary} from './Components/index';
-import {Image} from './Utils/index';
 
 const DEFAULT_FEATURES = {
     crop: true,
@@ -62,7 +61,7 @@ export default class ImageEditor extends Component {
 
     componentDidMount() {
         if (this.props.value && this.props.value.__identity) {
-            this.loadImage = api.media.image.loadMetaData(this.props.value)
+            this.loadImage = api.media.image.loadFromMetaData(this.props.value.__identity)
                 .then(image => this.setState({image}));
         }
 
@@ -80,7 +79,7 @@ export default class ImageEditor extends Component {
 
         if (this.props.value && this.props.value.__identity &&
             nextProps.value.__identity !== this.props.value.__identity) {
-            api.media.image.loadMetaData(nextProps.value)
+            api.media.image.loadFromMetaData(nextProps.value.__identity)
                 .then(image => this._isMounted && this.setState({image}));
         }
     }
@@ -93,16 +92,7 @@ export default class ImageEditor extends Component {
     onCrop(cropArea) {
         const {commit, value} = this.props;
         const {image} = this.state;
-
-        const imageWidth = $get('originalDimensions.width', image);
-        const imageHeight = $get('originalDimensions.height', image);
-        const cropAdjustments = {
-            x: Math.round(cropArea.x / 100 * imageWidth),
-            y: Math.round(cropArea.y / 100 * imageHeight),
-            width: Math.round(cropArea.width / 100 * imageWidth),
-            height: Math.round(cropArea.height / 100 * imageHeight)
-        };
-        const nextimage = $set(CROP_IMAGE_ADJUSTMENT, cropAdjustments, image);
+        const nextimage = image.crop(cropArea);
 
         this.setState({image: nextimage});
 
@@ -114,8 +104,7 @@ export default class ImageEditor extends Component {
     onResize(resizeAdjustment) {
         const {commit, value} = this.props;
         const {image} = this.state;
-        const nextimage = resizeAdjustment ?
-            $set(RESIZE_IMAGE_ADJUSTMENT, resizeAdjustment, image) : $drop(RESIZE_IMAGE_ADJUSTMENT, image);
+        const nextimage = image.resize(resizeAdjustment);
 
         this.setState({image: nextimage});
 
@@ -230,7 +219,7 @@ export default class ImageEditor extends Component {
             case SECONDARY_CROPPER:
                 return (
                     <Secondary.ImageCropper
-                        sourceImage={Image.fromImageData(image)}
+                        sourceImage={image}
                         options={options}
                         onClose={() => this.toggleSecondaryScreen(SECONDARY_NONE)}
                         onComplete={cropArea => this.onCrop(cropArea)}

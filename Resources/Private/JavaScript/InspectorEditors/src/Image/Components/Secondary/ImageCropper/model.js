@@ -1,295 +1,208 @@
+import {component} from '@neos/libs-utils/decorators';
+import PropTypes from 'proptypes';
 import {filter, map, values, merge, memoize} from 'ramda';
-import {Maybe, Some, None} from 'monet';
+import {Maybe} from 'monet';
 
-//
-// AspectRatioStrategies
-//
+import Dimensions from 'Libraries/Media/src/models/dimensions/index';
+import ImageVariant from 'Libraries/Media/src/models/imagevariant/index';
 
-export class NullAspectRatioStrategy {
-    constructor(label) {
-        this.__label = label;
-    }
-
-    get width () {
-        return null;
-    }
-
-    get height () {
-        return null;
-    }
-
-    get aspectRatio () {
-        return None();
-    }
-
-    get label () {
-        return this.__label;
-    }
-
-    setDimensions(width, height) {
-        return new CustomAspectRatioStrategy(width, height);
-    }
-}
-
-export class ConfiguredAspectRatioStrategy extends NullAspectRatioStrategy {
-    constructor(width, height, label) {
-        super(label);
-        this.__width = width;
-        this.__height = height;
-    }
-
-    get width () {
-        return this.__width;
-    }
-
-    get height () {
-        return this.__height;
-    }
-
-    get aspectRatio () {
-        return Some(this.width / this.height);
-    }
-
-    get label () {
-        return this.__label || `${this.width}:${this.height}`;
-    }
-}
-
-export class CustomAspectRatioStrategy extends ConfiguredAspectRatioStrategy {
-    constructor(width, height) {
-        super(width, height, 'Custom');
-    }
-}
-
-export class OriginalAspectRatioStrategy extends NullAspectRatioStrategy {
-    constructor(image) {
-        super('Original');
-        this.__image = image;
-    }
-
-    get width () {
-        return this.__image.dimensions.width;
-    }
-
-    get height () {
-        return this.__image.dimensions.height;
-    }
-
-    get aspectRatio () {
-        return Some(this.width / this.height);
-    }
-}
-
-export class AspectRatioOption {
-    constructor(label, aspectRatioStrategyFactory) {
-        this.__label = label;
-        this.__aspectRatioStrategyFactory = aspectRatioStrategyFactory;
-    }
-
-    get label () {
-        return this.__label;
-    }
-
-    get value () {
-        return this;
-    }
-
-    getNextAspectRatioStrategy (currentAspectRatioStrategy) {
-        console.log(currentAspectRatioStrategy);
-        return this.__aspectRatioStrategyFactory(currentAspectRatioStrategy);
-    }
-}
-
-export class CustomAspectRatioOption extends AspectRatioOption {
-    constructor() {
-        super(
-            'Custom',
-            cropConfiguration => {
-                const {width, height} = cropConfiguration.aspectRatioDimensions
-                    .orElse(cropConfiguration.image.cropAdjustment)
-                    .orSome({
-                        width: 100,
-                        height: 100
-                    });
-
-                return new CustomAspectRatioStrategy(width, height);
-            }
-        );
-    }
-}
-
-export class OriginalAspectRatioOption extends AspectRatioOption {
-    constructor() {
-        super(
-            'Original',
-            cropConfiguration => new OriginalAspectRatioStrategy(
-                cropConfiguration.image
-            )
-        );
-    }
-}
-
-const DEFAULT_BOUNDARIES = {
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100
+const ASPECT_RATIO_STRATEGY_SHAPE = {
+    dimensions: PropTypes.shape(Dimensions.shape).isRequired,
+    label: PropTypes.string.isRequired,
+    matches: PropTypes.func.isRequired
 };
 
-const determineInitialAspectRatioStrategy = (image, neosConfiguration) => {
-    const {options} = neosConfiguration;
-    const when = condition => o => condition ? Some(o) : None();
-    const whenAllowOriginal = when(neosConfiguration.allowOriginal && image.aspectRatio);
-    const whenIsOriginal = o => whenAllowOriginal(o)
-        .bind(() => image.cropAspectRatio)
-        .bind(aspectRatio => aspectRatio.toFixed(2) == image.aspectRatio.toFixed(2) ? Some(o) : None());
-    const whenAllowCustom = when(neosConfiguration.allowCustom);
+@component({
+    dimensions: PropTypes.shape(Dimensions.shape).isRequired,
+    label: PropTypes.string.isRequired
+})
+export class ConfiguredAspectRatioStrategy {
+    static shape = ASPECT_RATIO_STRATEGY_SHAPE;
 
-    //
-    // First, check if the image maybe is cropped with
-    // its original aspect ratio
-    //
-    return whenIsOriginal(new OriginalAspectRatioStrategy(image))
+    get label () {
+        return this.props.label;
+    }
 
-        //
-        // Check if the aspect ratio of the currently edited image matches with one
-        // of the configured aspect ratios
-        //
-        .orElse(
-            image.cropAspectRatio
-            .bind(aspectRatio => Maybe.fromNull(
-                //
-                // Read out aspect ratio options and filter them
-                //
-                values(options).filter(o => (o.width/o.height).toFixed(2) == aspectRatio.toFixed(2))[0]
-            ))
-            .map(o => new ConfiguredAspectRatioStrategy(o.width, o.height, o.label))
-        )
+    get dimensions () {
+        return this.props.dimensions;
+    }
 
-        //
-        // If the original aspect ratio does not match, assume, that a custom aspect ratio was
-        // applied
-        //
-        .orElse(
-            image.cropAdjustment
-            .bind(({width, height}) => whenAllowCustom(new CustomAspectRatioStrategy(width, height)))
-        )
+    next(next, {width, height}) {
+        return new CustomAspectRatioStrategy(
+            Dimensions.fromJSON({width, height})
+        );
+    }
 
-        //
-        // As last resort, assume that no aspect ratio was applied so far
-        //
-        .orSome(new NullAspectRatioStrategy());
-};
+    matches(dimensions) {
+        return dimensions.aspectRatio.toFixed(2) === this.dimensions.aspectRatio.toFixed(2);
+    }
+}
 
-//
-// CropConfiguration
-//
+@component({
+    dimensions: PropTypes.shape(Dimensions.shape).isRequired
+})
+export class CustomAspectRatioStrategy {
+    static shape = ASPECT_RATIO_STRATEGY_SHAPE;
 
-const getGreatestCommonDivisor = memoize(
-    (a, b) => b ? getGreatestCommonDivisor(b, a%b) : a
-);
+    get label () {
+        return 'Custom';
+    }
 
+    get dimensions () {
+        return this.props.dimensions;
+    }
+
+    matches() {
+        return false;
+    }
+}
+
+@component({
+    image: PropTypes.shape(ImageVariant.shape).isRequired
+})
+export class OriginalAspectRatioStrategy {
+    static shape = ASPECT_RATIO_STRATEGY_SHAPE;
+
+    get label () {
+        return 'Original';
+    }
+
+    get dimensions () {
+        return this.props.image.processed.original.dimensions;
+    }
+
+    next(next, {width, height}) {
+        return new CustomAspectRatioStrategy(
+            Dimensions.fromJSON({width, height})
+        );
+    }
+
+    matches(dimensions) {
+        return dimensions.aspectRatio.toFixed(2) === this.dimensions.aspectRatio.toFixed(2);
+    }
+}
+
+const when = condition => o => condition ? Maybe.Some(o) : Maybe.None();
+
+@component({
+    image: PropTypes.shape(ImageVariant.shape).isRequired,
+    features: PropTypes.shape({
+        allowOriginal: PropTypes.bool,
+        allowCustom: PropTypes.bool
+    }).isRequired,
+    aspectRatioOptions: PropTypes.arrayOf(
+        PropTypes.shape({
+            width: PropTypes.number.isRequired,
+            height: PropTypes.number.isRequired,
+            label: PropTypes.string
+        })
+    ).isRequired,
+    chosenAspectRatioStrategy: PropTypes.shape(ASPECT_RATIO_STRATEGY_SHAPE),
+    isFreeAspectRatioMode: PropTypes.bool
+})
 export default class CropConfiguration {
-    constructor(image, aspectRatioOptions, aspectRatioStrategy) {
-        this.__image = image;
-        this.__aspectRatioOptions = aspectRatioOptions;
-        this.__aspectRatioStrategy = aspectRatioStrategy;
-    }
-
-    static fromNeosConfiguration = (image, neosConfiguration) => {
-        const aspectRatioOptions = []
-            .concat(neosConfiguration.allowCustom ? new CustomAspectRatioOption() : [])
-            .concat(neosConfiguration.allowOriginal ? new OriginalAspectRatioOption() : [])
-            .concat(
-                values(neosConfiguration.options).map(
-                    o => {
-                        const strategy = new ConfiguredAspectRatioStrategy(o.width, o.height, o.label);
-                        return new AspectRatioOption(strategy.label, () => strategy);
-                    }
-                )
-            );
-
-        return new CropConfiguration(
-            image,
-            aspectRatioOptions,
-            determineInitialAspectRatioStrategy(image, neosConfiguration)
-        );
+    static shape = {
+        aspectRatioOptions: PropTypes.arrayOf(
+            PropTypes.shape(ASPECT_RATIO_STRATEGY_SHAPE)
+        ).isRequired,
+        maybeAspectRatioStrategy: PropTypes.object.isRequired,
+        aspectRatioReducedLabel: PropTypes.string.isRequired
     };
 
-    get image () {
-        return this.__image;
-    }
-
     get aspectRatioOptions () {
-        return this.__aspectRatioOptions;
+        const {image} = this.props;
+        const {dimensions} = image.processed.original;
+
+        return []
+            .concat(this.props.features.allowCustom ? [new CustomAspectRatioStrategy({dimensions})] : [])
+            .concat(this.props.features.allowOriginal ? [new OriginalAspectRatioStrategy({image})] : [])
+            .concat(this.props.aspectRatioOptions.map(option => new ConfiguredAspectRatioStrategy({
+                dimensions: Dimensions.fromJSON(option),
+                label: option.label || `${option.width}:${option.height}`
+            })));
     }
 
-    get aspectRatioStrategy () {
-        return this.__aspectRatioStrategy;
-    }
+    get maybeAspectRatioStrategy () {
+        const {isFreeAspectRatioMode} = this.props;
+        const {dimensions} = this.props.image.processed.original;
 
-    get aspectRatioDimensions () {
-        const {width, height} = this.aspectRatioStrategy;
+        if (isFreeAspectRatioMode) {
+            return Maybe.None();
+        }
 
-        return width && height ? Some({width, height}) : None();
+        return Maybe.fromNull(this.props.chosenAspectRatioStrategy)
+            .orElse(
+                Maybe.fromNull(
+                    this.aspectRatioOptions.filter(option => option.matches(dimensions))[0]
+                )
+            );
     }
 
     get aspectRatioReducedLabel () {
-        return this.aspectRatioDimensions.map(({width, height}) => {
-            const greatestCommonDivisor = getGreatestCommonDivisor(width, height);
-            return `${width/greatestCommonDivisor}:${height/greatestCommonDivisor}`;
-        });
+        const {width, height} = this.maybeAspectRatioStrategy
+            .map(aspectRatioStrategy => aspectRatioStrategy.dimensions.reduced)
+            .orSome(this.props.image.processed.original.dimensions.reduced);
+
+        return `${width}:${height}`;
     }
 
-    get cropInformation () {
-        const boundaries = this.__image.cropAdjustment.map(c => ({
-            x: c.x / this.__image.dimensions.width * 100,
-            y: c.y / this.__image.dimensions.height * 100,
-            width: c.width / this.__image.dimensions.width * 100,
-            height: c.height / this.__image.dimensions.height * 100
-        })).orSome(DEFAULT_BOUNDARIES);
-        const aspectRatio = this.aspectRatioStrategy.aspectRatio
-            .map(aspect => ({aspect}))
-            .orSome({});
-
-        return merge(boundaries, aspectRatio);
+    get maybeCropInformation () {
+        return this.props.image.maybeCropAdjustment
+            .map(c => ({
+                x: c.x / this.props.image.original.dimensions.width * 100,
+                y: c.y / this.props.image.original.dimensions.height * 100,
+                width: c.width / this.props.image.original.dimensions.width * 100,
+                height: c.height / this.props.image.original.dimensions.height * 100
+            }))
+            .map(
+                merge(
+                    this.maybeAspectRatioStrategy
+                        .map(dimensions => ({aspect: dimensions.aspectRatio}))
+                        .orSome({})
+                )
+            );
     }
 
     selectAspectRatioOption(option) {
-        return new CropConfiguration(
-            this.__image,
-            this.__aspectRatioOptions,
-            option.getNextAspectRatioStrategy(this)
-        );
-    }
-
-    updateImage(image) {
-        return new CropConfiguration(
-            image,
-            this.__aspectRatioOptions,
-            this.__aspectRatioStrategy
-        );
+        return this.next({
+            chosenAspectRatioStrategy: option,
+            isFreeAspectRatioMode: false
+        });
     }
 
     updateAspectRatioDimensions(width, height) {
-        return new CropConfiguration(
-            this.__image,
-            this.__aspectRatioOptions,
-            this.aspectRatioStrategy.setDimensions(width, height)
+        const nextAspectRatioStrategyFactory = Maybe.fromNull(
+            this.aspectRatioOptions.filter(option => option.matches(Dimensions.fromJSON({width, height})))[0]
         )
+        .map(aspectRatioStrategy => () => aspectRatioStrategy)
+        .orSome(() => new CustomAspectRatioStrategy(
+            Dimensions.fromJSON({width, height})
+        ));
+
+        return this.selectAspectRatioOption(nextAspectRatioStrategyFactory());
     }
 
     flipAspectRatio() {
-        return this.aspectRatioDimensions
-            .map(({width, height}) => this.updateAspectRatioDimensions(height, width))
-            .orSome(this);
+        const {width, height} = this.maybeAspectRatioStrategy
+            .map(aspectRatioStrategy => aspectRatioStrategy.dimensions.reduced)
+            .orSome(this.props.image.processed.original.dimensions.reduced);
+
+        return this.updateAspectRatioDimensions(height, width);
     }
 
     clearAspectRatio() {
-        return new CropConfiguration(
-            this.__image,
-            this.__aspectRatioOptions,
-            new NullAspectRatioStrategy('')
-        )
+        return this.next({
+            chosenAspectRatioStrategy: null,
+            isFreeAspectRatioMode: true
+        });
     }
 }
+
+CropConfiguration.fromNeosConfiguration = (image, neosConfiguration) => new CropConfiguration({
+    image,
+    features: {
+        allowCustom: neosConfiguration.allowCustom,
+        allowOriginal: neosConfiguration.allowOriginal
+    },
+    aspectRatioOptions: console.log(values(neosConfiguration.options)) || values(neosConfiguration.options)
+});

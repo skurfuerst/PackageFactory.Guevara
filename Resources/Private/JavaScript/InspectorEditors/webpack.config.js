@@ -50,8 +50,13 @@ const config = {
     ],
 
     resolve: {
+        root: [
+            path.resolve(__dirname, '..')
+        ],
         alias: {
             '@host': path.resolve(__dirname, '../Customization/Host/'),
+            '@neos/libs-utils': path.resolve(__dirname, '../Libraries/Utils/src/'),
+            '@neos/libs-media': path.resolve(__dirname, '../Libraries/Media/src/'),
             'react': path.resolve(__dirname, '../Customization/Host/react/')
         },
         modulesDirectories: [
