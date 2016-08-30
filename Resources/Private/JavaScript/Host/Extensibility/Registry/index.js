@@ -22,6 +22,11 @@ class SynchronousRegistry {
         return this._registry[key];
     }
 
+    has(key) {
+        // TODO: "key" must be string!
+        return this._registry.hasOwnProperty(key);
+    }
+
     getAllAsObject() {
         return Object.assign({}, this._registry);
     }

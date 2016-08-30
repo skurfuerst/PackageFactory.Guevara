@@ -4,6 +4,8 @@ import React, {Component, PropTypes} from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import {connect} from 'react-redux';
 import {$get, $transform} from 'plow-js';
+import {selectors} from 'Host/Redux/index';
+import {hideDisallowedToolbarComponents} from './index';
 
 // Predicate matching all "element.id"s starting with "prefix".
 const startsWith = prefix => element =>
@@ -13,7 +15,8 @@ const startsWith = prefix => element =>
  * The Actual StyleSelect component
  */
 @connect($transform({
-    activeFormatting: $get('ui.contentCanvas.activeFormatting'),
+    formattingUnderCursor: selectors.UI.ContentCanvas.formattingUnderCursor,
+    activeFormattingRules: selectors.UI.ContentCanvas.activeFormattingRules,
     context: $get('guest.context')
 }))
 export default class StyleSelect extends Component {
@@ -22,7 +25,8 @@ export default class StyleSelect extends Component {
         // the Registry ID/Key of the Style-Select component itself.
         id: PropTypes.string.isRequired,
 
-        activeFormatting: PropTypes.objectOf(React.PropTypes.bool),
+        formattingUnderCursor: PropTypes.objectOf(React.PropTypes.bool),
+        activeFormattingRules: PropTypes.arrayOf(PropTypes.string),
 
         // The current guest frames window object.
         context: PropTypes.object
@@ -35,19 +39,30 @@ export default class StyleSelect extends Component {
 
     handleOnSelect(selectedStyleId) {
         const style = registry.ckEditor.toolbar.get(selectedStyleId);
-        this.props.context.NeosCKEditorApi.toggleFormat(style.formatting);
+        if (style && style.formatting) {
+            this.props.context.NeosCKEditorApi.toggleFormat(style.formatting);
+        } else {
+            console.warn("Style formatting not set: ", selectedStyleId, style);
+        }
+
     }
 
     render() {
-        const nestedStyles = registry.ckEditor.toolbar.getAllAsList().filter(startsWith(`${this.props.id}/`));
+        const nestedStyles = registry.ckEditor.toolbar.getAllAsList()
+            .filter(startsWith(`${this.props.id}/`))
+            .filter(hideDisallowedToolbarComponents(this.props.activeFormattingRules));
 
         const options = nestedStyles.map(style => ({
             label: style.label,
             value: style.id
         }));
 
+        if (options.length === 0) {
+            return null;
+        }
+
         const selectedStyle = nestedStyles.find(style =>
-            $get(style.formatting, this.props.activeFormatting)
+            $get(style.formatting, this.props.formattingUnderCursor)
         );
 
         return <SelectBox options={options} value={selectedStyle ? selectedStyle.id : null} onSelect={this.handleOnSelect}/>;

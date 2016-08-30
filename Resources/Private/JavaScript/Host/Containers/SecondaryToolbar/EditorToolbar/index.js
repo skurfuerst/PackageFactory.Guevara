@@ -7,37 +7,48 @@ import {$get, $transform} from 'plow-js';
 import style from './style.css';
 
 import registry from 'Host/Extensibility/Registry/index';
+import {selectors} from 'Host/Redux/index';
 
 // a component is top-level if it does not contain slashes in the name.
-const topLevelToolbarComponent = componentDefinition =>
+const isTopLevelToolbarComponent = componentDefinition =>
     componentDefinition.id.indexOf('/') === -1;
 
+
+export const hideDisallowedToolbarComponents = (activeFormattingRules) => componentDefinition => {
+    return activeFormattingRules.indexOf(componentDefinition.formatting) !== -1 || !componentDefinition.formatting;
+};
 /**
  * Render sub components for the toolbar, implementing the API as described in registry.ckEditor.toolbar.
  */
-const renderToolbarComponents = (context, toolbarComponents, activeFormatting) => {
-    return toolbarComponents.filter(topLevelToolbarComponent).map((componentDefinition, index) => {
-        const {component, formatting, callbackPropName, ...props} = componentDefinition;
-        const isActive = formatting && $get(formatting, activeFormatting);
+const renderToolbarComponents = (context, toolbarComponents, activeFormattingRules, formattingUnderCursor) => {
+    return toolbarComponents
+        .filter(isTopLevelToolbarComponent)
+        .filter(hideDisallowedToolbarComponents(activeFormattingRules))
+        .map((componentDefinition, index) => {
+            const {component, formatting, callbackPropName, ...props} = componentDefinition;
+            const isActive = formatting && $get(formatting, formattingUnderCursor);
 
-        props[callbackPropName] = () => {
-            // !!!! TODO: next line is extremely dirty!
-            context.NeosCKEditorApi.toggleFormat(formatting);
-        };
+            props[callbackPropName] = () => {
+                // !!!! TODO: next line is extremely dirty!
+                context.NeosCKEditorApi.toggleFormat(formatting);
+            };
 
-        const Component = component;
+            const Component = component;
 
-        return <Component key={index} isActive={isActive} {...props}/>;
-    });
+            return <Component key={index} isActive={isActive} {...props}/>;
+        });
 };
 
 @connect($transform({
-    activeFormatting: $get('ui.contentCanvas.activeFormatting'),
+    formattingUnderCursor: selectors.UI.ContentCanvas.formattingUnderCursor,
+    activeFormattingRules: selectors.UI.ContentCanvas.activeFormattingRules,
+
     context: $get('guest.context')
 }))
 export default class Toolbar extends Component {
     static propTypes = {
-        activeFormatting: PropTypes.objectOf(React.PropTypes.bool),
+        formattingUnderCursor: PropTypes.objectOf(React.PropTypes.bool),
+        activeFormattingRules: PropTypes.arrayOf(PropTypes.string),
 
         // The current guest frames window object.
         context: PropTypes.object
@@ -55,7 +66,8 @@ export default class Toolbar extends Component {
         const renderedToolbarComponents = renderToolbarComponents(
             this.props.context,
             registry.ckEditor.toolbar.getAllAsList(),
-            this.props.activeFormatting
+            this.props.activeFormattingRules,
+            this.props.formattingUnderCursor
         );
 
         return (

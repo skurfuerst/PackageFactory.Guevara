@@ -124,7 +124,7 @@ const webpackConfig = {
 //
 if (!env.isCi && !env.isTesting && !env.isStorybook) {
     // TODO: LIVE RELOADING DOES NOT WORK WITH CODE SPLITTING
-    webpackConfig.plugins.push(new LiveReloadPlugin({appendScriptTag: true}));
+    //webpackConfig.plugins.push(new LiveReloadPlugin({appendScriptTag: true}));
 }
 
 module.exports = webpackConfig;

@@ -95,6 +95,20 @@ export const byContextPathSelector = defaultMemoize(
     )
 );
 
+/**
+ * State, contextPath
+ */
+export const byContextPathDynamicAccessSelector = createSelector(
+    [
+        storedNodeByContextPath,
+        nodeTypeByNameSelector
+    ],
+    (storedNodeByContextPath, nodeTypeByName) => {
+        return contextPath => resolveNodeFromContextPath(contextPath, storedNodeByContextPath, nodeTypeByName)
+    }
+);
+
+
 export const byNodeTypeSelector = defaultMemoize(
     nodeTypeName => createSelector(
         [

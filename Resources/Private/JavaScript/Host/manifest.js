@@ -8,18 +8,18 @@ const {manifest} = window['@Neos:HostPluginAPI'];
 manifest('main', registry => {
     registry.ckEditor.formattingAndStyling.add('p', {style: {element: 'p'}});
 
-    registry.ckEditor.formattingAndStyling.add('h1', {style: {element: 'h1'}});
-    registry.ckEditor.formattingAndStyling.add('h2', {style: {element: 'h2'}});
-    registry.ckEditor.formattingAndStyling.add('h3', {style: {element: 'h3'}});
-    registry.ckEditor.formattingAndStyling.add('h4', {style: {element: 'h4'}});
-    registry.ckEditor.formattingAndStyling.add('h5', {style: {element: 'h5'}});
-    registry.ckEditor.formattingAndStyling.add('h6', {style: {element: 'h6'}});
-    registry.ckEditor.formattingAndStyling.add('pre', {style: {element: 'pre'}});
+    registry.ckEditor.formattingAndStyling.add('h1', {style: {element: 'h1'}, allowedContent: {h1: true}});
+    registry.ckEditor.formattingAndStyling.add('h2', {style: {element: 'h2'}, allowedContent: {h2: true}});
+    registry.ckEditor.formattingAndStyling.add('h3', {style: {element: 'h3'}, allowedContent: {h3: true}});
+    registry.ckEditor.formattingAndStyling.add('h4', {style: {element: 'h4'}, allowedContent: {h4: true}});
+    registry.ckEditor.formattingAndStyling.add('h5', {style: {element: 'h5'}, allowedContent: {h5: true}});
+    registry.ckEditor.formattingAndStyling.add('h6', {style: {element: 'h6'}, allowedContent: {h6: true}});
+    registry.ckEditor.formattingAndStyling.add('pre', {style: {element: 'pre'}, allowedContent: {pre: true}});
     registry.ckEditor.formattingAndStyling.add('removeFormat', {command: 'removeFormat'});
 
-    registry.ckEditor.formattingAndStyling.add('bold', {command: 'bold'});
-    registry.ckEditor.toolbar.add('bold', {
-        formatting: 'bold',
+    registry.ckEditor.formattingAndStyling.add('strong', {command: 'bold', allowedContent: {strong: true}});
+    registry.ckEditor.toolbar.add('strong', {
+        formatting: 'strong',
         component: IconButton,
         callbackPropName: 'onClick',
 
@@ -42,6 +42,10 @@ manifest('main', registry => {
         callbackPropName: 'onSelect'
     });
 
+    registry.ckEditor.toolbar.add('style/p', {
+        formatting: 'p',
+        label: 'Paragraph'
+    });
     registry.ckEditor.toolbar.add('style/h1', {
         formatting: 'h1',
         label: 'Headline 1'

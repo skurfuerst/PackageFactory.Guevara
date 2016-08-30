@@ -16,7 +16,8 @@ const createCKEditorAPI = CKEDITOR => {
 
     // an object with the following keys:
     // - formattingAndStyling
-    // - onActiveFormattingChange
+    // - setFormattingUnderCursor
+    // - setCurrentlyEditedPropertyName
     let editorConfig = null;
     let currentEditor = null;
 
@@ -25,29 +26,29 @@ const createCKEditorAPI = CKEDITOR => {
             // TODO: why was the previous code all inside here? weirdo...
         }
 
-        const activeState = {};
+        const formattingUnderCursor = {};
         Object.keys(editorConfig.formattingAndStyling).forEach(key => {
             const description = editorConfig.formattingAndStyling[key];
 
             if (description.command !== undefined) {
                 if (!editor.getCommand(description.command)) {
-                    activeState[key] = false;
+                    formattingUnderCursor[key] = false;
                     return;
                 }
 
-                activeState[key] = editor.getCommand(description.command).state === CKEDITOR.TRISTATE_ON;
+                formattingUnderCursor[key] = editor.getCommand(description.command).state === CKEDITOR.TRISTATE_ON;
                 return;
             }
 
             if (description.style !== undefined) {
                 if (!editor.elementPath()) {
-                    activeState[key] = false;
+                    formattingUnderCursor[key] = false;
                     return;
                 }
 
                 const style = new CKEDITOR.style(description.style); // eslint-disable-line babel/new-cap
 
-                activeState[key] = style.checkActive(editor.elementPath(), editor);
+                formattingUnderCursor[key] = style.checkActive(editor.elementPath(), editor);
                 return;
             }
 
@@ -58,7 +59,7 @@ const createCKEditorAPI = CKEDITOR => {
             `);
         });
 
-        editorConfig.onActiveFormattingChange(activeState);
+        editorConfig.setFormattingUnderCursor(formattingUnderCursor);
     };
 
     //
@@ -116,11 +117,11 @@ const createCKEditorAPI = CKEDITOR => {
             `);
         },
 
-        createEditor(dom, onChange) {
+        createEditor(dom, propertyName, allowedContent, onChange) {
             const finalOptions = Object.assign(
                 {
                     removePlugins: 'toolbar,contextmenu,liststyle,tabletools',
-                    allowedContent: true,
+                    allowedContent: allowedContent,
                     extraPlugins: 'removeformat'
                 }
             );
@@ -135,6 +136,7 @@ const createCKEditorAPI = CKEDITOR => {
 
                 editable.attachListener(editable, 'focus', event => {
                     currentEditor = editor;
+                    editorConfig.setCurrentlyEditedPropertyName(propertyName);
 
                     editable.attachListener(editable, 'keyup', handleUserInteraction);
                     editable.attachListener(editable, 'mouseup', handleUserInteraction);
