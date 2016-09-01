@@ -85,6 +85,7 @@ const registry = {
 
             Every component gets the following properties (see EditorEnvelope/index.js)
 
+            - identifier: an identifier which can be used for HTML ID generation
             - label: the label
             - node: the current node
             - value: The value to display

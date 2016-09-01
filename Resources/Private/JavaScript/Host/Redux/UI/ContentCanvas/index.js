@@ -118,7 +118,13 @@ const activeFormattingRules = createSelector(
         calculateActiveFormattingRulesForNode(focusedNode)[currentlyEditedPropertyName] || []
 );
 
-const formattingUnderCursorSelector = $get('ui.contentCanvas.formattingUnderCursor');
+const formattingUnderCursorSelector = createSelector(
+    [
+        $get('ui.contentCanvas.formattingUnderCursor')
+    ],
+    formattingUnderCursor =>
+        formattingUnderCursor.toJS()
+);
 
 export const selectors = {
     activeFormattingRules,
