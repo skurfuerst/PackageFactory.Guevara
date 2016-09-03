@@ -36,7 +36,8 @@ const createCKEditorAPI = CKEDITOR => {
                     return;
                 }
 
-                formattingUnderCursor[key] = editor.getCommand(description.command).state === CKEDITOR.TRISTATE_ON;
+                formattingUnderCursor[key] = editor.getCommand(description.command).state;
+                console.log(CKEDITOR, description.command, editor.getCommand(description.command).state);
                 return;
             }
 
@@ -110,17 +111,26 @@ const createCKEditorAPI = CKEDITOR => {
                 return;
             }
 
+            if (description.executeCode) {
+                console.log("EXEC CODE");
+                description.executeCode(CKEDITOR, currentEditor);
+
+                currentEditor.fire('change');
+                handleUserInteractionCallbackFactory(currentEditor)();
+                return;
+            }
+
             throw new Error(`
                 An error occured while applying a format in CK Editor.
-                The description parameter needs to either have a key "command" or
-                a key "style" - none of which could be found.
+                The description parameter needs to either have a key "command",
+                "style" or "executeCode" - none of which could be found.
             `);
         },
 
         createEditor(dom, propertyName, allowedContent, onChange) {
             const finalOptions = Object.assign(
                 {
-                    removePlugins: 'toolbar,contextmenu',
+                    removePlugins: 'toolbar',
                     allowedContent: allowedContent,
                     extraPlugins: 'removeformat'
                 }

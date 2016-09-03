@@ -5,6 +5,10 @@ import {actions} from 'Host/Redux';
 
 const {manifest} = window['@Neos:HostPluginAPI'];
 
+const TRISTATE_DISABLED = 0;
+const TRISTATE_ON = 1;
+const TRISTATE_DFF = 2;
+
 manifest('main', registry => {
     registry.ckEditor.formattingAndStyling.add('p', {style: {element: 'p'}});
 
@@ -22,10 +26,27 @@ manifest('main', registry => {
     registry.ckEditor.formattingAndStyling.add('u', {command: 'underline', allowedContent: {u: true}});
     registry.ckEditor.formattingAndStyling.add('sub', {command: 'subscript', allowedContent: {sub: true}});
     registry.ckEditor.formattingAndStyling.add('sup', {command: 'superscript', allowedContent: {sup: true}});
-    registry.ckEditor.formattingAndStyling.add('del', {command: 'strike', allowedContent: {s: true}}); // TODO: does not work yet
+    registry.ckEditor.formattingAndStyling.add('del', {command: 'strike', allowedContent: {s: true}});
 
-    registry.ckEditor.formattingAndStyling.add('ol', {command: 'numberedlist', allowedContent: {ol: true}});// TODO: does not work yet
-    registry.ckEditor.formattingAndStyling.add('ul', {command: 'numberedlist', allowedContent: {ul: true}});// TODO: does not work yet
+    registry.ckEditor.formattingAndStyling.add('ol', {command: 'numberedlist', allowedContent: {ol: true, li: true}});
+    registry.ckEditor.formattingAndStyling.add('ul', {command: 'bulletedlist', allowedContent: {ul: true, li: true}});
+    registry.ckEditor.formattingAndStyling.add('indent', {command: 'indent'});
+    registry.ckEditor.formattingAndStyling.add('outdent', {command: 'outdent'});
+    registry.ckEditor.formattingAndStyling.add('table', {
+        executeCode: (CKEDITOR, editor) => {
+            const makeElement = name =>
+                new CKEDITOR.dom.element( name, editor.document);
+
+            const table = makeElement('table');
+            const tbody = table.append( makeElement( 'tbody' ) );
+            const tr = tbody.append( makeElement( 'tr' ) );
+            const td = tr.append( makeElement( 'td' ) );
+            td.appendBogus();
+
+            editor.insertElement(table);
+        },
+        allowedcontent: {table: true}
+    }); // TODO
 
     registry.ckEditor.toolbar.add('strong', {
         formatting: 'strong',
@@ -94,11 +115,44 @@ manifest('main', registry => {
         hoverStyle: 'brand'
     });
 
+    registry.ckEditor.toolbar.add('indent', {
+        formatting: 'indent',
+        component: IconButton,
+        callbackPropName: 'onClick',
+
+        icon: 'indent',
+        hoverStyle: 'brand',
+        isVisibleWhen: (activeFormattingRules, formattingUnderCursor) => {
+            return (activeFormattingRules.indexOf('ul') !== -1 || activeFormattingRules.indexOf('ol') !== -1)
+                && formattingUnderCursor['indent'] !== TRISTATE_DISABLED
+        }
+    });
+    registry.ckEditor.toolbar.add('outdent', {
+        formatting: 'outdent',
+        component: IconButton,
+        callbackPropName: 'onClick',
+
+        icon: 'outdent',
+        hoverStyle: 'brand',
+        isVisibleWhen: (activeFormattingRules, formattingUnderCursor) => {
+            return (activeFormattingRules.indexOf('ul') !== -1 || activeFormattingRules.indexOf('ol') !== -1)
+                && formattingUnderCursor['outdent'] !== TRISTATE_DISABLED
+        }
+    });
+    registry.ckEditor.toolbar.add('table', {
+        formatting: 'table',
+        component: IconButton,
+        callbackPropName: 'onClick',
+
+        icon: 'table',
+        hoverStyle: 'brand',
+    });
 
 
     registry.ckEditor.toolbar.add('style', {
         component: StyleSelect,
-        callbackPropName: 'onSelect'
+        callbackPropName: 'onSelect',
+        isVisibleWhen: () => true
     });
 
     registry.ckEditor.toolbar.add('style/p', {

@@ -9,13 +9,23 @@ import style from './style.css';
 import registry from 'Host/Extensibility/Registry/index';
 import {selectors} from 'Host/Redux/index';
 
+
+// TAKEN FROM CKEDITOR
+const TRISTATE_DISABLED = 0;
+const TRISTATE_ON = 1;
+const TRISTATE_DFF = 2;
+
 // a component is top-level if it does not contain slashes in the name.
 const isTopLevelToolbarComponent = componentDefinition =>
     componentDefinition.id.indexOf('/') === -1;
 
 
-export const hideDisallowedToolbarComponents = (activeFormattingRules) => componentDefinition => {
-    return activeFormattingRules.indexOf(componentDefinition.formatting) !== -1 || !componentDefinition.formatting;
+export const hideDisallowedToolbarComponents = (activeFormattingRules, formattingUnderCursor) => componentDefinition => {
+    if (componentDefinition.isVisibleWhen) {
+        return componentDefinition.isVisibleWhen(activeFormattingRules, formattingUnderCursor);
+    } else {
+        return activeFormattingRules.indexOf(componentDefinition.formatting) !== -1;
+    }
 };
 /**
  * Render sub components for the toolbar, implementing the API as described in registry.ckEditor.toolbar.
@@ -23,10 +33,10 @@ export const hideDisallowedToolbarComponents = (activeFormattingRules) => compon
 const renderToolbarComponents = (context, toolbarComponents, activeFormattingRules, formattingUnderCursor) => {
     return toolbarComponents
         .filter(isTopLevelToolbarComponent)
-        .filter(hideDisallowedToolbarComponents(activeFormattingRules))
+        .filter(hideDisallowedToolbarComponents(activeFormattingRules, formattingUnderCursor))
         .map((componentDefinition, index) => {
             const {component, formatting, callbackPropName, ...props} = componentDefinition;
-            const isActive = formatting && $get(formatting, formattingUnderCursor);
+            const isActive = formatting && $get(formatting, formattingUnderCursor) == TRISTATE_ON;
 
             props[callbackPropName] = () => {
                 // !!!! TODO: next line is extremely dirty!

@@ -70,7 +70,7 @@ const inlineEditable = properties => propertyName =>
     $get([propertyName, 'ui', 'inlineEditable'], properties);
 
 const postProcessAlohaConfig = alohaConfiguration => {
-    const keysToParse = ['format', 'link', 'list'];
+    const keysToParse = ['format', 'link', 'list', 'table'];
 
     const allowedStylings = [];
     if (alohaConfiguration) {
