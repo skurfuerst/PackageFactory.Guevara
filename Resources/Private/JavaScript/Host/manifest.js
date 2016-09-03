@@ -18,6 +18,15 @@ manifest('main', registry => {
     registry.ckEditor.formattingAndStyling.add('removeFormat', {command: 'removeFormat'});
 
     registry.ckEditor.formattingAndStyling.add('strong', {command: 'bold', allowedContent: {strong: true}});
+    registry.ckEditor.formattingAndStyling.add('em', {command: 'italic', allowedContent: {em: true}});
+    registry.ckEditor.formattingAndStyling.add('u', {command: 'underline', allowedContent: {u: true}});
+    registry.ckEditor.formattingAndStyling.add('sub', {command: 'subscript', allowedContent: {sub: true}});
+    registry.ckEditor.formattingAndStyling.add('sup', {command: 'superscript', allowedContent: {sup: true}});
+    registry.ckEditor.formattingAndStyling.add('del', {command: 'strike', allowedContent: {s: true}}); // TODO: does not work yet
+
+    registry.ckEditor.formattingAndStyling.add('ol', {command: 'numberedlist', allowedContent: {ol: true}});// TODO: does not work yet
+    registry.ckEditor.formattingAndStyling.add('ul', {command: 'numberedlist', allowedContent: {ul: true}});// TODO: does not work yet
+
     registry.ckEditor.toolbar.add('strong', {
         formatting: 'strong',
         component: IconButton,
@@ -26,16 +35,66 @@ manifest('main', registry => {
         icon: 'bold',
         hoverStyle: 'brand'
     });
-
-    registry.ckEditor.formattingAndStyling.add('italic', {command: 'italic'});
     registry.ckEditor.toolbar.add('italic', {
-        formatting: 'italic',
+        formatting: 'em',
         component: IconButton,
         callbackPropName: 'onClick',
 
         icon: 'italic',
         hoverStyle: 'brand'
     });
+    registry.ckEditor.toolbar.add('underline', {
+        formatting: 'u',
+        component: IconButton,
+        callbackPropName: 'onClick',
+
+        icon: 'underline',
+        hoverStyle: 'brand'
+    });
+    registry.ckEditor.toolbar.add('subscript', {
+        formatting: 'sub',
+        component: IconButton,
+        callbackPropName: 'onClick',
+
+        icon: 'subscript',
+        hoverStyle: 'brand'
+    });
+    registry.ckEditor.toolbar.add('superscript', {
+        formatting: 'sup',
+        component: IconButton,
+        callbackPropName: 'onClick',
+
+        icon: 'superscript',
+        hoverStyle: 'brand'
+    });
+    registry.ckEditor.toolbar.add('strikethrough', {
+        formatting: 'del',
+        component: IconButton,
+        callbackPropName: 'onClick',
+
+        icon: 'strikethrough',
+        hoverStyle: 'brand'
+    });
+
+    registry.ckEditor.toolbar.add('orderedList', {
+        formatting: 'ol',
+        component: IconButton,
+        callbackPropName: 'onClick',
+
+        icon: 'list-ol',
+        hoverStyle: 'brand'
+    });
+
+    registry.ckEditor.toolbar.add('unorderedList', {
+        formatting: 'ul',
+        component: IconButton,
+        callbackPropName: 'onClick',
+
+        icon: 'list-ul',
+        hoverStyle: 'brand'
+    });
+
+
 
     registry.ckEditor.toolbar.add('style', {
         component: StyleSelect,

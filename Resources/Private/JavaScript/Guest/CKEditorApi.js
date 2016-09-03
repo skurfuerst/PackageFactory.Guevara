@@ -120,7 +120,7 @@ const createCKEditorAPI = CKEDITOR => {
         createEditor(dom, propertyName, allowedContent, onChange) {
             const finalOptions = Object.assign(
                 {
-                    removePlugins: 'toolbar,contextmenu,liststyle,tabletools',
+                    removePlugins: 'toolbar,contextmenu',
                     allowedContent: allowedContent,
                     extraPlugins: 'removeformat'
                 }
