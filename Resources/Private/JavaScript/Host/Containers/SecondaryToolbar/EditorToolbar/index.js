@@ -53,7 +53,7 @@ const renderToolbarComponents = (context, toolbarComponents, activeFormattingRul
     formattingUnderCursor: selectors.UI.ContentCanvas.formattingUnderCursor,
     activeFormattingRules: selectors.UI.ContentCanvas.activeFormattingRules,
 
-    context: $get('guest.context')
+    context: selectors.Guest.context
 }))
 export default class Toolbar extends Component {
     static propTypes = {

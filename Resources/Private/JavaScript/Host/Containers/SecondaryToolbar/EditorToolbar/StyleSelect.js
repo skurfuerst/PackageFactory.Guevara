@@ -17,7 +17,7 @@ const startsWith = prefix => element =>
 @connect($transform({
     formattingUnderCursor: selectors.UI.ContentCanvas.formattingUnderCursor,
     activeFormattingRules: selectors.UI.ContentCanvas.activeFormattingRules,
-    context: $get('guest.context')
+    context: selectors.Guest.context
 }))
 export default class StyleSelect extends Component {
 
