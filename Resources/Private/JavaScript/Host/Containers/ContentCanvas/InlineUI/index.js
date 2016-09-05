@@ -15,6 +15,8 @@ export default class InlineUI extends Component {
     render() {
         return (
             <div className={style.inlineUi} data-__neos__inlineUI="TRUE">
+                <div id="ckeditor-top-toolbar" className={style.ckeditorTopToolbar}></div>
+                <div id="ckeditor-bottom-toolbar" className={style.ckeditorBottomToolbar}></div>
                 <NodeToolbar/>
                 <MarkActiveNodeAsFocused/>
                 <MarkHoveredNodeAsHovered/>

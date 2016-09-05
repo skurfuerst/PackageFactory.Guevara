@@ -53,6 +53,10 @@ const createCKEditorAPI = CKEDITOR => {
                 return;
             }
 
+            if (description.executeCode) {
+                return;
+            }
+
             throw new Error(`
                 An error occured while checking a format in CK Editor.
                 The description parameter needs to either have a key "command" or
@@ -130,9 +134,27 @@ const createCKEditorAPI = CKEDITOR => {
         createEditor(dom, propertyName, allowedContent, onChange) {
             const finalOptions = Object.assign(
                 {
-                    removePlugins: 'toolbar',
-                    allowedContent: allowedContent,
-                    extraPlugins: 'removeformat'
+                    //removePlugins: 'toolbar',
+                    //allowedContent: allowedContent,
+                    extraPlugins: 'sharedspace,removeformat',
+                    removePlugins: 'floatingspace,maximize,resize',
+                    sharedSpaces: {
+                        top: 'ckeditor-top-toolbar',
+                        bottom: 'ckeditor-bottom-toolbar'
+                    },
+                    toolbar: [
+                        { name: 'clipboard', items: [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ] },
+                        { name: 'editing', items: [ 'Scayt' ] },
+                        { name: 'links', items: [ 'Link', 'Unlink', 'Anchor' ] },
+                        { name: 'insert', items: [ 'Image', 'Table', 'HorizontalRule', 'SpecialChar' ] },
+                        { name: 'tools', items: [ 'Maximize' ] },
+                        { name: 'document', items: [ 'Source' ] },
+                        '/',
+                        { name: 'xy', items: [ 'Bold', 'Italic', 'Strike', '-', 'RemoveFormat' ] },
+                        { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote' ] },
+                        { name: 'styles', items: [ 'Styles', 'Format' ] },
+                        { name: 'about', items: [ 'About' ] }
+                    ]
                 }
             );
 

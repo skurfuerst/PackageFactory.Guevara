@@ -5,3 +5,8 @@
 .inlineUi a {
     color: #fff;
 }
+
+.ckeditorTopToolbar,
+.ckeditorBottomToolbar {
+    display: none;
+}

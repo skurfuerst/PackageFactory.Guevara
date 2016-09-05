@@ -34,7 +34,9 @@ manifest('main', registry => {
     registry.ckEditor.formattingAndStyling.add('outdent', {command: 'outdent'});
     registry.ckEditor.formattingAndStyling.add('table', {
         executeCode: (CKEDITOR, editor) => {
-            const makeElement = name =>
+            editor.openDialog('table');
+            // TODO: allowedContent does not work here...
+            /*const makeElement = name =>
                 new CKEDITOR.dom.element( name, editor.document);
 
             const table = makeElement('table');
@@ -43,9 +45,9 @@ manifest('main', registry => {
             const td = tr.append( makeElement( 'td' ) );
             td.appendBogus();
 
-            editor.insertElement(table);
+            editor.insertElement(table);*/
         },
-        allowedcontent: {table: true}
+        allowedcontent: 'table{width,height}[align,border,cellpadding,cellspacing,summary];caption tbody thead tfoot;th td tr[scope]'
     }); // TODO
 
     registry.ckEditor.toolbar.add('strong', {
