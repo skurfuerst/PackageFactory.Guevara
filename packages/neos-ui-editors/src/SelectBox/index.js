@@ -11,7 +11,34 @@ export default class SelectBoxEditor extends PureComponent {
     static propTypes = {
         commit: PropTypes.func.isRequired,
         value: PropTypes.any,
-        options: PropTypes.any.isRequired,
+        options: PropTypes.shape({
+            // TODO
+            allowEmpty: PropTypes.bool,
+            // TODO
+            placeholder: PropTypes.string,
+
+            // TODO
+            multiple: PropTypes.bool,
+
+            // TODO
+            dataSourceIdentifier: PropTypes.string,
+            dataSourceUri: PropTypes.string,
+            dataSourceAdditionalData: PropTypes.objectOf(PropTypes.any),
+
+            // TODO
+            minimumResultsForSearch: PropTypes.number,
+
+            values: PropTypes.objectOf(
+                PropTypes.shape({
+                    label: PropTypes.string,
+                    icon: PropTypes.string, // TODO test
+
+                    // TODO
+                    group: PropTypes.string
+                })
+            )
+
+        }).isRequired,
 
         i18nRegistry: PropTypes.object.isRequired
     };
