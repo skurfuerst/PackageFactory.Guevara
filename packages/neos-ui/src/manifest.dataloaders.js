@@ -157,4 +157,41 @@ manifest('main.dataloaders', {}, globalRegistry => {
             });
         }
     });
+
+    dataLoadersRegistry.add('DataSources', {
+        description: `
+            Look up Data Source Values:
+
+            - by identifier (resolveValue())
+            - by searching data source values (client-side) (search())
+
+            OPTIONS:
+                - contextNodePath: ...
+                - dataSourceIdentifier: The data source to load. Either this or dataSourceUri is required.
+                - dataSourceUri: The data source URL to load.
+                - dataSourceAdditionalData: Additional data to send to the server
+        `,
+
+        _lru() {
+            if (!this._lruCache) {
+                this._lruCache = new HLRU(500);
+            }
+            return this._lruCache;
+        },
+
+        resolveValue(options, identifier) {
+            return this._loadDataSourcesByOptions(options);
+        },
+
+        _loadDataSourcesByOptions(options) {
+            const cacheKey = makeCacheKey('', options);
+            if (this._lru().has(cacheKey)) {
+
+            }
+        },
+
+        resolveValues(options, identifiers) {
+            return this._loadDataSourcesByOptions(options);
+        }
+    });
 });
