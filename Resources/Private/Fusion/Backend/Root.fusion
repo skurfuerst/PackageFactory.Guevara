@@ -12,6 +12,7 @@ backend = Neos.Fusion:Template {
 
     configuration = Neos.Fusion:RawArray {
         nodeTree = ${Configuration.setting('Neos.Neos.userInterface.navigateComponent.nodeTree')}
+        structureTree = ${Configuration.setting('Neos.Neos.userInterface.navigateComponent.structureTree')}
         allowedTargetWorkspaces = ${Neos.Ui.Workspace.getAllowedTargetWorkspaces()}
         @process.json = ${Json.stringify(value)}
     }
@@ -97,7 +98,10 @@ backend = Neos.Fusion:Template {
                     }
                 }
 
-                @if.isAvailable = ${Neos.Neos.Ui.Modules.isAvailable(moduleName)}
+                @if {
+                    isNotHiddenInMenu = ${!module.hideInMenu}
+                    isAvailable = ${Neos.Neos.Ui.Modules.isAvailable(moduleName)}
+                }
             }
         }
 

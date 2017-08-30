@@ -1,8 +1,9 @@
 import {takeLatest} from 'redux-saga';
 import {put, select} from 'redux-saga/effects';
-import {$get} from 'plow-js';
+import {$get, $contains} from 'plow-js';
 
-import {actionTypes, actions} from '@neos-project/neos-ui-redux-store';
+import {actionTypes, actions, selectors} from '@neos-project/neos-ui-redux-store';
+import {parentNodeContextPath, isNodeCollapsed} from '@neos-project/neos-ui-redux-store/src/CR/Nodes/helpers';
 
 import backend from '@neos-project/neos-ui-backend-connector';
 
@@ -31,6 +32,30 @@ function * watchReloadTree({globalRegistry}) {
     });
 }
 
+function * watchNodeFocus({configuration}) {
+    yield * takeLatest(actionTypes.CR.Nodes.FOCUS, function * loadContentNodeRootLine(action) {
+        const {contextPath} = action.payload;
+        const documentNodeContextPath = yield select($get('ui.contentCanvas.contextPath'));
+
+        let parentContextPath = contextPath;
+
+        const documentNode = yield select(selectors.UI.ContentCanvas.documentNodeSelector);
+        const loadingDepth = configuration.structureTree.loadingDepth;
+        while (parentContextPath !== documentNodeContextPath) {
+            parentContextPath = parentNodeContextPath(parentContextPath);
+            const getNodeByContextPathSelector = selectors.CR.Nodes.makeGetNodeByContextPathSelector(parentContextPath);
+            const node = yield select(getNodeByContextPathSelector);
+            const isToggled = yield select($contains(parentContextPath, 'ui.contentTree.toggled'));
+            const isCollapsed = isNodeCollapsed(node, isToggled, documentNode, loadingDepth);
+
+            if (!node || isCollapsed) {
+                yield put(actions.UI.ContentTree.toggle(parentContextPath));
+            }
+        }
+    });
+}
+
 export const sagas = [
-    watchReloadTree
+    watchReloadTree,
+    watchNodeFocus
 ];

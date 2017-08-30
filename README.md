@@ -7,6 +7,11 @@
 
 > The next generation Neos CMS interface written in ReactJS with Immutable data structures.
 
+## Support the UI rewrite
+
+We are currently raising funds to speed up the development. If you like what you see you can
+support us by chipping in and help us to reach our goal. Find more details
+[here](https://www.neos.io/blog/speeding-up-the-react-ui-development-with-your-support.html)
 
 ## Features
 
@@ -18,7 +23,7 @@
 
 ## Installation and usage
 
-1. You need to have latest Neos CMS 3.0 up & running.
+1. You need to have the latest release of Neos CMS (3.x) up & running.
 
 2. Run the following command:
    ```
@@ -42,17 +47,6 @@ need the `dev-master` release. You can install the master release using:
 ```
 composer require neos/neos-ui:dev-master neos/neos-ui-compiled:dev-master
 ```
-
-### Use Docker image
-
-__Alternatively__, instead of doing above setup steps manually, use Docker.
-The [million12/neos-react-ui](https://github.com/million12/docker-neos-react-ui)
-contains Neos CMS, correct version of NodeJS/nvm and `neos/neos-ui` package
-installed and built, working out of the box.
-
-Refer to [million12/neos-react-ui](https://github.com/million12/docker-neos-react-ui)
-documentation about how to use it.
-
 
 ## Contributing
 
@@ -104,7 +98,7 @@ In order to start contributing, follow the following steps:
 | `yarn build` |  Runs `build:dev` optimised for production. |
 | `yarn build:ui:watch` | Watches the source files for changes and runs a build:ui in case. |
 | `yarn build:ui:watch-poll` | Watches (and polls) the source files on a file share. Should preferably be used when working an a VM for example. |
-| `yarn start-storybook` | Starts the storybook server. |
+| `yarn start-storybook` | Starts the storybook server on port 9001. |
 | `yarn lint`  | Lints all source files. |
 | `yarn test`  | Executes `yarn lint` to trigger tests via ava. |
 
