@@ -6,7 +6,7 @@ import {connect} from 'react-redux';
 import flowright from 'lodash.flowright';
 import Tree from '@neos-project/react-ui-components/src/Tree/';
 import {stripTags, decodeHtml} from '@neos-project/utils-helpers';
-
+import debugReasonForRendering from '@neos-project/debug-reason-for-rendering';
 import {actions, selectors} from '@neos-project/neos-ui-redux-store';
 import {isNodeCollapsed} from '@neos-project/neos-ui-redux-store/src/CR/Nodes/helpers';
 import {neos} from '@neos-project/neos-ui-decorators';
@@ -39,7 +39,8 @@ const decodeLabel = flowright(
 
 export default class Node extends PureComponent {
     state = {
-        shouldScrollIntoView: false
+        shouldScrollIntoView: false,
+        wasFocused: false
     };
 
     static propTypes = {
@@ -79,24 +80,19 @@ export default class Node extends PureComponent {
 
     componentDidMount() {
         // Always request scroll on first render if given node is focused
-        if (this.props.focusedNodeContextPath === $get('contextPath', this.props.node)) {
+        if (this.props.isFocused) {
             this.setState({
                 shouldScrollIntoView: true
             });
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        // If focused node changed
-        if (this.props.focusedNodeContextPath !== nextProps.focusedNodeContextPath) {
-            // And it is the current node
-            if (nextProps.focusedNodeContextPath === $get('contextPath', nextProps.node)) {
-                // Request scrolling itself into view
-                this.setState({
-                    shouldScrollIntoView: true
-                });
-            }
-        }
+    static getDerivedStateFromProps(nextProps, prevState) {
+        return {
+            // only scroll into view if we were not focused before and we are now focused
+            shouldScrollIntoView: (prevState.wasFocused === false && nextProps.isFocused),
+            wasFocused: nextProps.isFocused
+        };
     }
 
     componentDidUpdate() {
@@ -295,8 +291,15 @@ export default class Node extends PureComponent {
         onNodeToggle($get('contextPath', node));
     }
 
-    handleNodeClick = () => {
+    handleNodeClick = (x) => {
         const {node, onNodeFocus, onNodeClick} = this.props;
+        console.log("NODE CLICK", x, x.metaKey, x.altKey, x.ctrlKey);
+        if (x.metaKey) {
+
+            window.open(window.location.protocol+'//'+window.location.hostname+(window.location.port?":"+window.location.port:"")+window.location.pathname + '?node=' + $get('contextPath', node));
+            return;
+        }
+
         onNodeFocus($get('contextPath', node));
         onNodeClick($get('uri', node), $get('contextPath', node));
     }

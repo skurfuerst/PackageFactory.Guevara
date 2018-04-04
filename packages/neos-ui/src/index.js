@@ -59,6 +59,7 @@ function * application() {
     // We'll show just some loading screen,
     // until we're good to go
     //
+    console.time("init");
     ReactDOM.render(
         <div style={{width: '100vw', height: '100vh', backgroundColor: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px'}}>
             <Icon icon="circle-o-notch" label="Loading..." spin={true} size="big"/>
@@ -75,6 +76,8 @@ function * application() {
     // Load frontend configuration very early, as we want to make it available in manifests
     //
     const frontendConfiguration = yield system.getFrontendConfiguration;
+    console.timeEnd("init");
+    console.time("mf");
 
     //
     // Initialize extensions
@@ -85,10 +88,14 @@ function * application() {
 
     const reducers = globalRegistry.get('reducers').getAllAsList().map(element => element.reducer);
     delegatingReducer.setReducer(handleActions(reducers));
+    console.timeEnd("mf");
 
+    console.time("cfg");
     const configuration = yield system.getConfiguration;
 
     const routes = yield system.getRoutes;
+    console.timeEnd("cfg");
+    console.time("cfg2");
 
     //
     // Bootstrap the saga middleware with initial sagas
@@ -99,19 +106,27 @@ function * application() {
     // Tell everybody, that we're booting now
     //
     store.dispatch(actions.System.boot());
+    console.timeEnd("cfg2");
+    console.time("cfg3");
 
     const {getJsonResource} = backend.get().endpoints;
 
     const groupsAndRoles = yield system.getNodeTypes;
+    console.timeEnd("cfg3");
+    console.time("cfg4a");
 
     //
     // Load json resources
     //
     const nodeTypesSchemaPromise = getJsonResource(configuration.endpoints.nodeTypeSchema);
     const translationsPromise = getJsonResource(configuration.endpoints.translations);
+    console.timeEnd("cfg4a");
+    console.time("cfg4b");
 
     // Fire multiple async requests in parallel
     const [nodeTypesSchema, translations] = yield [nodeTypesSchemaPromise, translationsPromise];
+    console.timeEnd("cfg4b");
+    console.time("cfg5");
     const nodeTypesRegistry = globalRegistry.get('@neos-project/neos-ui-contentrepository');
     Object.keys(nodeTypesSchema.nodeTypes).forEach(nodeTypeName => {
         nodeTypesRegistry.set(nodeTypeName, {
@@ -146,6 +161,8 @@ function * application() {
     const persistedState = localStorage.getItem('persistedState') ? JSON.parse(localStorage.getItem('persistedState')) : {};
     const mergedState = merge({}, serverState, persistedState);
     yield put(actions.System.init(mergedState));
+    console.timeEnd("cfg5");
+    console.time("cfg5");
 
     //
     // Just make sure that everybody does their initialization homework
@@ -166,6 +183,8 @@ function * application() {
     });
 
     const menu = yield system.getMenu;
+    console.timeEnd("cfg5");
+    console.time("cfg6");
 
     //
     // After everything was initilalized correctly, render the application itself.
@@ -188,6 +207,8 @@ function * application() {
         documentNodeContextPath,
         merge: true
     }));
+
+    console.timeEnd("cfg6");
 }
 
 sagaMiddleWare.run(application);

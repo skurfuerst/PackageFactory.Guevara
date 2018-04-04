@@ -27,9 +27,9 @@ export default class MenuItem extends PureComponent {
     }
 
     render() {
-        const {skipI18n, label, icon, uri} = this.props;
+        const {skipI18n, label, icon, uri, target} = this.props;
 
-        return (
+        const innerButton = (
             <Button
                 className={style.drawer__menuItemBtn}
                 onClick={this.handleClick}
@@ -41,5 +41,6 @@ export default class MenuItem extends PureComponent {
                 {skipI18n ? label : <I18n id={label} fallback={label}/>}
             </Button>
         );
+        return (target === 'Window' ? <a href={uri}>{innerButton}</a> : innerButton);
     }
 }

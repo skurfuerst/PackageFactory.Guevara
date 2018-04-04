@@ -1,4 +1,5 @@
-import React, {PureComponent} from 'react';
+import React, {PureComponent, unstable_AsyncMode as AsyncMode} from 'react';
+
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {$get} from 'plow-js';
@@ -82,20 +83,22 @@ export default class NodeTree extends PureComponent {
         });
 
         return (
-            <Tree className={classNames}>
-                <ChildRenderer
-                    ChildRenderer={ChildRenderer}
-                    nodeDndType={dndTypes.NODE}
-                    node={rootNode}
-                    level={1}
-                    onNodeToggle={this.handleToggle}
-                    onNodeClick={this.handleClick}
-                    onNodeFocus={this.handleFocus}
-                    onNodeDrag={this.handleDrag}
-                    onNodeDrop={this.handleDrop}
-                    currentlyDraggedNode={this.state.currentlyDraggedNode}
-                    />
-            </Tree>
+            <AsyncMode>
+                <Tree className={classNames}>
+                    <ChildRenderer
+                        ChildRenderer={ChildRenderer}
+                        nodeDndType={dndTypes.NODE}
+                        node={rootNode}
+                        level={1}
+                        onNodeToggle={this.handleToggle}
+                        onNodeClick={this.handleClick}
+                        onNodeFocus={this.handleFocus}
+                        onNodeDrag={this.handleDrag}
+                        onNodeDrop={this.handleDrop}
+                        currentlyDraggedNode={this.state.currentlyDraggedNode}
+                        />
+                </Tree>
+            </AsyncMode>
         );
     }
 }

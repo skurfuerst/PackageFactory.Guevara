@@ -70,7 +70,7 @@ class PolicyAspect
     }
 
     /**
-     * @Flow\Around("method(Neos\Neos\Ui\Fusion\Helper\NodeInfoHelper->renderNode())")
+     * __Flow\Around("method(Neos\Neos\Ui\Fusion\Helper\NodeInfoHelper->renderNode())")
      * @return void
      */
     public function enforceCreateNodePrivilege(JoinPointInterface $joinPoint)
@@ -96,7 +96,7 @@ class PolicyAspect
     }
 
     /**
-     * @Flow\Around("method(Neos\Neos\Ui\Fusion\Helper\NodeInfoHelper->renderNode())")
+     * __Flow\Around("method(Neos\Neos\Ui\Fusion\Helper\NodeInfoHelper->renderNode())")
      * @return array
      */
     public function enforceRemoveNodePrivilege(JoinPointInterface $joinPoint)
@@ -113,7 +113,7 @@ class PolicyAspect
     }
 
     /**
-     * @Flow\Around("method(Neos\Neos\Ui\Fusion\Helper\NodeInfoHelper->renderNode())")
+     * __Flow\Around("method(Neos\Neos\Ui\Fusion\Helper\NodeInfoHelper->renderNode())")
      * @return array
      */
     public function enforceEditNodePrivilege(JoinPointInterface $joinPoint)
@@ -130,7 +130,7 @@ class PolicyAspect
     }
 
     /**
-     * @Flow\Around("method(Neos\Neos\Ui\Fusion\Helper\NodeInfoHelper->renderNode())")
+     * __Flow\Around("method(Neos\Neos\Ui\Fusion\Helper\NodeInfoHelper->renderNode())")
      * @return void
      */
     public function enforceEditNodePropertyPrivilege(JoinPointInterface $joinPoint)

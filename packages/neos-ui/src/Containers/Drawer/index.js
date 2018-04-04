@@ -91,7 +91,7 @@ export default class Drawer extends PureComponent {
 
             case TARGET_WINDOW:
             default:
-                window.location.href = uri;
+                // the a tag is already set
                 break;
         }
     }
