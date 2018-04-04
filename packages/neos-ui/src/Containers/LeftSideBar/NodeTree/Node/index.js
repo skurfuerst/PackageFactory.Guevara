@@ -55,8 +55,8 @@ export default class Node extends PureComponent {
         isLastChild: PropTypes.bool,
         childNodes: PropTypes.object,
         level: PropTypes.number.isRequired,
-        currentDocumentNodeContextPath: PropTypes.string,
-        focusedNodeContextPath: PropTypes.string,
+        isActive: PropTypes.bool,
+        isFocused: PropTypes.bool,
         toggledNodeContextPaths: PropTypes.object,
         hiddenContextPaths: PropTypes.object,
         intermediateContextPaths: PropTypes.object,
@@ -160,17 +160,17 @@ export default class Node extends PureComponent {
     }
 
     isFocused() {
-        const {node, focusedNodeContextPath} = this.props;
+        const {node, isFocused} = this.props;
 
-        return focusedNodeContextPath === $get('contextPath', node);
+        return isFocused;
     }
 
     isActive() {
-        const {node, currentDocumentNodeContextPath, isContentTreeNode} = this.props;
+        const {node, isActive, isContentTreeNode} = this.props;
         if (isContentTreeNode) {
             return this.isFocused();
         }
-        return currentDocumentNodeContextPath === $get('contextPath', node);
+        return isActive;
     }
 
     isCollapsed() {
@@ -323,9 +323,8 @@ export const PageTreeNode = withNodeTypeRegistryAndI18nRegistry(connect(
             loadingDepth: neos.configuration.nodeTree.loadingDepth,
             childNodes: childrenOfSelector(state, getContextPath(node)),
             hasChildren: hasChildrenSelector(state, getContextPath(node)),
-            currentDocumentNodeContextPath: selectors.UI.ContentCanvas.getCurrentContentCanvasContextPath(state),
-            currentDocumentNode: selectors.UI.ContentCanvas.documentNodeSelector(state),
-            focusedNodeContextPath: selectors.UI.PageTree.getFocused(state),
+            isActive: selectors.UI.ContentCanvas.getCurrentContentCanvasContextPath(state) === $get('contextPath', node),
+            isFocused: selectors.UI.PageTree.getFocused(state) === $get('contextPath', node),
             toggledNodeContextPaths: selectors.UI.PageTree.getToggled(state),
             hiddenContextPaths: selectors.UI.PageTree.getHidden(state),
             intermediateContextPaths: selectors.UI.PageTree.getIntermediate(state),
@@ -365,9 +364,8 @@ export const ContentTreeNode = withNodeTypeRegistryAndI18nRegistry(connect(
             loadingDepth: neos.configuration.structureTree.loadingDepth,
             childNodes: childrenOfSelector(state, getContextPath(node)),
             hasChildren: hasChildrenSelector(state, getContextPath(node)),
-            currentDocumentNodeContextPath: selectors.UI.ContentCanvas.getCurrentContentCanvasContextPath(state),
-            currentDocumentNode: selectors.UI.ContentCanvas.documentNodeSelector(state),
-            focusedNodeContextPath: $get('cr.nodes.focused.contextPath', state),
+            isActive: selectors.UI.ContentCanvas.getCurrentContentCanvasContextPath(state) === $get('contextPath', node),
+            isFocused: selectors.UI.PageTree.getFocused(state) === $get('contextPath', node),
             toggledNodeContextPaths: selectors.UI.ContentTree.getToggled(state),
             isNodeDirty: isContentNodeDirtySelector(state, $get('contextPath', node)),
             canBeInsertedAlongside: canBeMovedAlongsideSelector(state, {
